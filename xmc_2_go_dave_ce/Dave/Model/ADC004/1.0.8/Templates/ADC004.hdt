@@ -1,0 +1,1603 @@
+/******************************************************************************
+ *
+ * Copyright (C) 2013 Infineon Technologies AG. All rights reserved.
+ *
+ * Infineon Technologies AG (Infineon) is supplying this software for use with
+ * Infineon's microcontrollers.
+ * This file can be freely distributed within development tools that are
+ * supporting such microcontrollers.
+ *
+ * THIS SOFTWARE IS PROVIDED "AS IS".  NO WARRANTIES, WHETHER EXPRESS, IMPLIED
+ * OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
+ * INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL,
+ * OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+ *
+********************************************************************************
+**                                                                            **
+**                                                                            **
+** PLATFORM : Infineon XMC1000 Series                                         **
+**                                                                            **
+** COMPILER : Compiler Independent                                            **
+**                                                                            **
+** AUTHOR   : DAVE App Developer                                              **
+**                                                                            **
+** MAY BE CHANGED BY USER [yes/no]: Yes                                       **
+**                                                                            **
+** MODIFICATION DATE : Jan 28, 2014                                           **
+**                                                                            **
+*******************************************************************************/
+/*******************************************************************************
+**                       Author(s) Identity                                   **
+********************************************************************************
+**                                                                            **
+** Initials     Name                                                          **
+** CM           DAVE App Developer                                            **
+** SSAM         Sridhar Sampath                                               **
+** ---------------------------------------------------------------------------**
+**                                                                            **
+*******************************************************************************/
+
+/**
+ * @file ADC004.h
+ *
+ * @brief This header file contains the data structures and function prototypes 
+ *        of ADC004 App
+ *
+ * Change History:
+ * Date       version       Details
+ * 13-Jun-2013  1.0.0     Initial code added for XMC1000
+ * 27-Jun-2013  1.0.2     Help doc updated
+ *                        Enable Arbitration slot removed from UI
+ * 13-Nov-2013  1.0.4     In GUI Group 0/1 is made as Group A/B and 
+ *                        manifest modified as per this change.
+ * 20-Jan-2014  1.0.6     New api ADC004_GetFastResult() implemented.
+ */
+#ifndef ADC004_H_
+#define ADC004_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/*****************************************************************************
+ * INCLUDE FILES
+ *****************************************************************************/
+#include <DAVE3.h>
+
+
+/******************************************************************************
+**                      Global Macro Definitions                              **
+*******************************************************************************/
+/** Maximum service request nodes */
+#define ADC004_MAX_SERVICE_REQUEST_NODE  2
+
+/** Maximum ADC group */
+#define ADC004_MAX_ADC_GROUP   2
+
+/** Maximum ADC channels per group */
+#define ADC004_MAX_ADC_GROUP_CHANNEL  8
+
+/** Total number of ADC channels */
+#define ADC004_TOTAL_ADC_CHANNEL    16
+
+/** Maximum sample time control register value */
+#define ADC004_MAX_SAMPLE_TIME_CONTROL_VAL  32
+/*******************************************************************************
+**                      Global Type Definitions                               **
+*******************************************************************************/
+
+/**
+ * @ingroup ADC004_publicparam
+ * @{
+ */
+/*******************************************************************************
+ *                                ENUMERATIONS                                **
+ ******************************************************************************/
+/**
+ * This enumerates the state of the App.
+ */
+typedef enum ADC004_StateType
+{
+  /**
+   * This is the Default state of an APP after power on reset.
+   */
+  ADC004_UNINITIALIZED,
+  /**
+   * This is the INITIALIZED state in which APP is initialized as per selected
+   * parameters.
+   */
+  ADC004_INITIALIZED
+}ADC004_StateType;
+
+
+/**
+ * This will enumerate the error codes which will be returned from a function.
+ */
+typedef enum ADC004_ErrorCodesType
+{
+  /**
+   * This code would be returned when any operation is not possible cause that
+   * operation was tried in invalid state
+   */
+    /*
+    GROUPID  #41
+    MODULENAME = ADC004
+    */
+    /*
+    ERRCODESTRING = ADC004_OPER_NOT_ALLOWED_ERROR
+    STRCODESTRING = Function execution is not allowed in the current state
+    */  
+  ADC004_OPER_NOT_ALLOWED_ERROR = 1,
+  /**
+   * This code is returned when parameter passed to API are invalid
+   */
+  /*
+  ERRCODESTRING = ADC004_INVALID_PARAM_ERROR
+  STRCODESTRING = Input parameter is not valid
+  */ 
+  ADC004_INVALID_PARAM_ERROR,
+  /*
+  ERRCODESTRING = ADCCH001_INVALID_RESULT
+  STRCODESTRING = Conversion result is invalid
+  */  
+  ADC004_INVALID_RESULT,  
+  /** Debug log messages */
+  /**
+   * Message Id for function Entry
+   */
+  /*
+  ERRCODESTRING = ADC004_FUN_ENTRY
+  STRCODESTRING = Function entered
+  */ 
+  ADC004_FUNCTION_ENTRY,
+  /**
+   * Message ID for function exit
+   */
+  /*
+  ERRCODESTRING = ADC004_FUN_EXIT
+  STRCODESTRING = Function exited
+  */ 
+  ADC004_FUNCTION_EXIT,
+}ADC004_ErrorCodesType;
+
+
+/**
+ * This enumerates the enable or disable of associated arbitration slot.
+ */
+typedef enum ADC004_ArbitrationSlot
+{
+  /**
+   * Disable the arbitration slot
+   */
+  ADC004_ARBITRATION_SLOT_DISABLE = 0,
+  /**
+   * Enable the arbitration slot
+   */
+  ADC004_ARBITRATION_SLOT_ENABLE
+}ADC004_ArbitrationSlot;
+
+
+/**
+ * This enumerates the start conversion after initialization.
+ */
+typedef enum ADC004_ConversionAfterInit
+{
+  /**
+   * Disable start conversion after initialization
+   */
+  ADC004_START_CONV_DISABLE = 0,
+  /**
+   * Enable conversion after initialization
+   */
+  ADC004_START_CONV_ENABLE
+}ADC004_ConversionAfterInit;
+
+
+/**
+ * This enumerates the auto scan functionality 
+ */
+typedef enum ADC004_Autoscan
+{
+  /**
+   * Auto scan functionality disabled
+   */
+  ADC004_AUTOSCAN_DISABLE = 0,
+  /**
+   * Auto scan functionality enabled
+   */
+  ADC004_AUTOSCAN_ENABLE
+}ADC004_Autoscan;
+
+/**
+ * This enumerates the result position alignment.
+ */
+typedef enum ADC004_PosAlign
+{
+  /**
+   * Result is Left aligned.
+   */
+  ADC004_LEFT_ALIGN = 0,
+  /**
+   * Result is Right aligned.
+   */
+  ADC004_RIGHT_ALIGN
+}ADC004_PosAlign;
+
+
+/**
+ * This enumerates the global input class
+ */
+typedef enum ADC004_GlobalInPutClass
+{
+  /**
+   * Global input class 0
+   */
+  ADC004_GLOBAL_CLASS0 = 2,
+  /**
+   * Global input class 1
+   */
+  ADC004_GLOBAL_CLASS1 
+}ADC004_GlobalInPutClass;
+
+
+/**
+ * This enumerates the gating mode.
+ */
+typedef enum ADC004_GatingMode
+{
+  /**
+   * Gating is disabled.
+   */
+  ADC004_GATING_DISABLED=0,
+  /**
+   * Gating is enabled always.
+   */
+  ADC004_GATING_ENABLED_ALWAYS=1,
+  /**
+   * Gating is enabled for high level.
+   */
+  ADC004_GATING_ENABLED_FOR_HIGH=2,
+  /**
+   * Gating is enabled for low level.
+   */
+  ADC004_GATING_ENABLED_FOR_LOW=3,
+}ADC004_GatingMode;
+
+/**
+ * This enumerates the SHS Reference voltages.
+ */
+typedef enum ADC004_SHS_REF
+{
+  /**
+   * SHS External Refference Upper supply range.
+   */
+  ADC004_SHS_EXT_REF_UPPER = 0,
+  /**
+   * SHS Internal Refference Upper supply range.
+   */
+  ADC004_SHS_INTERNAL_REF_UPPER = 2,
+  /**
+   * SHS Internal Refference Lower supply range.
+   */
+  ADC004_SHS_INTERNAL_REF_LOWER = 3,  
+}ADC004_SHS_REF;
+
+/**
+ * This enumerates the SHS Reference voltages.
+ */
+typedef enum ADC004_SHS_ANACONV
+{
+  /**
+   * SHS Analog Converter ON value.
+   */
+  ADC004_SHS_ANALOG_CONVERTER_ON = 0,
+  /**
+   * SHS Analog Converter OFF value.
+   */
+  ADC004_SHS_ANALOG_CONVERTER_OFF = 1,
+}ADC004_SHS_ANACONV;
+
+/**
+ * This enumerates the external trigger mode.
+ */
+typedef enum ADC004_TriggerMode
+{
+  /**
+   * External trigger disabled
+   */
+  ADC004_NOTRIGGER=0,
+  /**
+   * External trigger on falling edge
+   */
+  ADC004_TRIGGER_UPON_FALLING_EDGE=1,
+  /**
+   * External trigger on rising edge
+   */
+  ADC004_TRIGGER_UPON_RISING_EDGE=2,
+  /**
+   * External trigger on both edges
+   */
+  ADC004_TRIGGER_UPON_BOTH_EDGE=3,
+}ADC004_TriggerMode;
+
+/**
+ * This enumerates the priority.
+ */
+typedef enum ADC004_Priority
+{
+  /**
+   * App priority 0
+   */
+  ADC004_PRIORITY0=0,
+  /**
+   * App priority 1
+   */
+  ADC004_PRIORITY1=1,
+  /**
+   * App priority2
+   */
+  ADC004_PRIORITY2=2,
+  /**
+   * App priority 3
+   */
+  ADC004_PRIORITY3=3,
+}ADC004_Priority;
+
+
+/**
+ * This enumerates the autoscan source load event mode
+ */
+typedef enum ADC004_LoadEventMode
+{
+  /**
+   * Copy all bits from the select registers to the
+   * pending registers upon a load event.
+   */
+  ADC004_OVERWRITE_MODE = 0,
+  /**
+   * Set all pending bits that are set in the select
+   * registers upon a load event (logic OR)
+   */
+  ADC004_COMBINE_MODE
+}ADC004_LoadEventMode;
+
+
+/**
+ * This enumerates the channel event mode
+ */
+typedef enum ADC004_ChannelEventMode
+{
+  /**
+   * Channel event disabled
+   */
+  ADC004_CHANNEL_EVENT_NEVER = 0,
+  /**
+   * Channel event occurs if result is inside boundary
+   */
+  ADC004_CHANNEL_EVENT_INSIDE_BOUNDARY,
+  /**
+   * Channel event occurs if result is outside boundary
+   */
+  ADC004_CHANNEL_EVENT_OUTSIDE_BOUNDARY,
+  /**
+   * Channel event enabled
+   */
+  ADC004_CHANNEL_EVENT_ALWAYS,
+}ADC004_ChannelEventMode;
+
+/**
+ * This enumerates the start mode
+ */
+typedef enum ADC004_StartMode
+{
+  /**
+   * Wait for start mode
+   * The requested channel is sampled after the current conversion 
+   * has finished
+   */
+  ADC004_WAIT_FOR_START = 0,
+  /**
+   * Cancel inject Repeat mode
+   * After an injected conversion has finished,the interrupted conversion 
+   * request is injected into the pipeline,hence the measurement is repeated.
+   */
+  ADC004_CANCEL_INJECT_REPEAT=1,
+  /**
+   * Cancel inject Repeat mode with cancel mode
+   * In case of an ongoing conversion, this conversion is cancelled, the requested
+   * channel is sampled and converted immediately.
+   */
+   ADC004_CANCEL_INJECT_REPEAT_WITH_CANCEL=2,
+}ADC004_StartMode;
+
+
+/**
+ * This enumerates the result read mode
+ */
+typedef enum ADC004_ResultReadMode
+{
+
+  /**
+   * Result overwrite mode
+   * Result will be overwritten whether previous result is read or not 
+   */
+  ADC004_RESULT_OVERWRITE_MODE = 0,
+
+  /**
+   * Wait for read mode
+   * Result will be updated only if previous result is read
+   */
+  ADC004_WAIT_FOR_READ = 1
+}ADC004_ResultReadMode;
+
+/**
+ * This enumerates the Gain factor
+ */
+typedef enum ADC004_GainFactor
+{
+
+  /**
+   * Gain factor 1
+   * Gain factor is  1 for the selected channel  
+   */
+  GAIN_FACTOR_1 = 0,
+
+  /**
+   * Gain factor 3
+   * Gain factor is  3 for the selected channel  
+   */
+  GAIN_FACTOR_3 = 1,
+  
+  /**
+   * Gain factor 6
+   * Gain factor is  6 for the selected channel  
+   */
+  GAIN_FACTOR_6 = 2,
+  /**
+   * Gain factor 12
+   * Gain factor is  12 for the selected channel  
+   */
+  GAIN_FACTOR_12 = 3
+  
+}ADC004_GainFactor;
+
+
+/**
+ * This structure holds the parameters which change at run time.
+ */
+typedef struct ADC004_DynamicDataType
+{
+  /**
+   * This is group number of the channel corresponding to the value in global result register.
+   */
+  uint8_t GroupNo;
+  /**
+   * This is channel number corresponding to the value in global result register.
+   */
+  uint8_t ChannelNo;
+  /** This is the result of the conversion */
+  uint16_t Result;
+  /**
+   * This enumerates the state of the App.
+   */
+  ADC004_StateType State;
+}ADC004_DynamicDataType;
+
+/**
+ * This structure holds all the static configuration parameters of the Event
+ * Counter APP.
+ */
+typedef struct ADC004_HandleType
+{
+  /**
+   * This is Group 1 channel 7 gain.
+   */
+  const uint8_t kAnaRef;
+  /**
+   * This is Group 1 channel 7 gain.
+   */
+  const uint8_t kAnaControl;  
+  /**
+   * This is Group 1 channel 7 gain.
+   */
+  const uint8_t kGainG1Ch7;
+  /**
+   * This is Group 1 channel 6 gain.
+   */
+  const uint8_t kGainG1Ch6;
+    /**
+   * This is Group 1 channel 5 gain.
+   */
+  const uint8_t kGainG1Ch5;
+  /**
+   * This is Group 1 channel 4 gain.
+   */
+  const uint8_t kGainG1Ch4;
+  /**
+   * This is Group 1 channel 3 gain.
+   */
+  const uint8_t kGainG1Ch3;
+  /**
+   * This is Group 1 channel 2 gain.
+   */
+  const uint8_t kGainG1Ch2;
+  /**
+   * This is Group 1 channel 1 gain.
+   */
+  const uint8_t kGainG1Ch1;
+  /**
+   * This is Group 1 channel 0 gain.
+   */
+  const uint8_t kGainG1Ch0;
+  /**
+   * This is Group 0 channel 7 gain.
+   */
+  const uint8_t kGainG0Ch7;
+  /**
+   * This is Group 0 channel 6 gain.
+   */
+  const uint8_t kGainG0Ch6;
+  /**
+   * This is Group 0 channel 5 gain.
+   */
+  const uint8_t kGainG0Ch5;  
+  /**
+   * This is Group 0 channel 4 gain.
+   */
+  const uint8_t kGainG0Ch4;
+  /**
+   * This is Group 0 channel 3 gain.
+   */
+  const uint8_t kGainG0Ch3;
+  /**
+   * This is Group 0 channel 2 gain.
+   */
+  const uint8_t kGainG0Ch2;
+  /**
+   * This is Group 0 channel 1 gain.
+   */
+  const uint8_t kGainG0Ch1;
+  /**
+   * This is Group 0 channel 0 gain.
+   */
+  const uint8_t kGainG0Ch0;
+  /**
+   * This is Group 0/1 Loop 0  channel (0 to 7) enable.
+   */
+  const uint8_t kLoopen0;
+  /**
+   * This is Group 0/1 Loop 1  channel (0 to 7) enable.
+   */
+  const uint8_t kLoopen1;
+  /**
+   * This is Group slection for Loop 0.
+   */ 
+  const uint8_t kGroupLoop0;
+  /**
+   * This is Group slection for Loop 1.
+   */
+  const uint8_t kGroupLoop1;
+  /**
+   * This is Channel selection for Loop 1.
+   */
+  const uint8_t kChLoop1;
+  /**
+   * This is Channel selection for Loop 0.
+   */
+  const uint8_t kChLoop0;
+  /**
+   * This is total number of ADC channels selected.
+   */
+  const uint8_t kChannels;  
+  /**
+   * This contains combined value of channels selected for Scan sequence
+   * from group 0 
+   */  
+  const uint8_t kGroup0ChSelect;
+  /**
+   * This contains combined value of channels selected for Scan sequence
+   * from group 1 
+   */  
+  const uint8_t kGroup1ChSelect;
+  /**
+   * This is number of ADC channels selected from Group A.
+   */
+  const uint8_t kGrpAChannels;
+  /**
+   * This is number of ADC channels selected from Group B.
+   */
+  const uint8_t kGrpBChannels;
+  /*
+   * This indicates Active channels.
+   */
+  uint8_t kActiveChannels[2][8];  
+  /*
+   * This indicates Active groups.
+   */
+  uint8_t kActiveGroups[4];  
+  /**
+   * This is to select conversion start mode.
+   */
+  const uint8_t kStart;
+  /**
+   * This is priority of request source.
+   */
+  const uint8_t kPriority;
+  /**
+   * This is to select external trigger mode.
+   */
+  const uint8_t kTriggerMode;
+  /**
+   * This is to enable or disable external trigger mode.
+   */  
+  const uint8_t kTriggerEn;
+  /**
+   * This is to select gating mode.
+   */
+  const uint8_t kGatingMode;
+  /**
+   * This is to select result read mode.
+   */  
+  const uint8_t kResultReadMode;  
+  /**
+   * This is to enable or disable auto scan mode. 
+   */
+  const uint8_t kAutoScan;
+  /**
+   * This is to control the result alignment. 
+   */
+  const uint8_t kResultControl;
+  /**
+   * This is to enable or disable result event. 
+   */  
+  const uint8_t kResultEvtEnable;
+  /**
+   * This is to enable or disable resource event. 
+   */  
+  const uint8_t kResourceEvtEnable;
+  /**
+   * This is to select input class. 
+   */  
+  const uint8_t kIpClassSel;
+  /**
+   * This is the pointer to the structure which holds the parameters which 
+   * change at run time.
+   */
+  ADC004_DynamicDataType * DynamicHandlePtr;
+  /**
+   * This is the pointer to the VADC Global Registers.
+   */
+  VADC_GLOBAL_TypeDef* VADCGlobalPtr; 
+  /**
+   * This is the pointer to the SHS Registers.
+   */
+  SHS_Type* SHSPtr; 
+}ADC004_HandleType;
+
+
+/**
+ * This is the channel handle.
+ */  
+typedef struct ADC004_ChannelHandleType
+{
+  /**
+   * This is group number of assigned channel.
+   */
+  const uint8_t kGroupNo;
+  /**
+   * This is channel number of assigned channel.
+   */  
+  const uint8_t kChannelNo;
+  /**
+   * This is to enable or disable the channel for scan sequence.
+   */  
+  const uint8_t kEnable;
+}ADC004_ChannelHandleType;
+
+
+/**
+ * This is the result handle.
+ */
+typedef struct ADC004_ResultHandleType
+{
+  /**
+   * This is group number of the channel corresponding to the value in global result register.
+   */
+  uint8_t GroupNo;
+  /**
+   * This is channel number corresponding to the value in global result register.
+   */
+  uint8_t ChannelNo;
+  /**
+   * This is the value of conversion result.
+   */
+  uint16_t Result;
+}ADC004_ResultHandleType;
+
+/**
+ * @}
+ */
+/**
+ * @ingroup ADC004_apidoc
+ * @{
+ */
+ 
+/*******************************************************************************
+** FUNCTION PROTOTYPES                                                        **
+*******************************************************************************/
+
+/**
+ * @brief This function initializes the ADC background App with the configured
+ * parameters.
+ * @return None <BR>
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ * int main(void)
+ * {
+ *    DAVE_Init(); //ADC004_Init is called within DAVE_Init
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+void ADC004_Init(void);
+
+/**
+ * @brief This function resets the App.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @return <b>status_t</b><BR>
+ * DAVEApp_SUCCESS: if the function is successful.<BR><BR>
+ *
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *    //Call the deinit function to reset the app to default values.
+ *    Status = 
+ *          ADC004_Deinit((ADC004_HandleType*)&ADC004_Handle0);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_Deinit(const ADC004_HandleType* HandlePtr);
+
+
+/**
+ * @brief This function enables the result event. This is enabled for global result register and
+ * as global result register is shared by all the channels it is applicable for all the conversions.
+ * @param[in] HandlePtr pointer to the Instance variable
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ * ADC004_INVALID_PARAM_ERROR_ERROR: if the ResultPtr is NULL. <BR>
+ * ADC004_INVALID_RESULT : If the result is not updated.
+ *
+ * <b>Reentrant: yes</b> <BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    uint16_t Result;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    // Enable Result event service request
+ *    Status =
+ *          ADC004_EnableResultEvt((ADC004_HandleType*)&ADC004_Handle0);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_EnableResultEvt(const ADC004_HandleType* HandlePtr);
+                                                          
+/**
+ * @brief This function disables the result event.
+ * @param[in] HandlePtr pointer to the Instance variable
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ * ADC004_INVALID_PARAM_ERROR_ERROR: if the ResultPtr is NULL. <BR>
+ * ADC004_INVALID_RESULT : If the result is not updated. <BR>
+ *
+ * <b>Reentrant: yes</b> <BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    uint16_t Result;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Disable Result event service request
+ *    Status =
+ *          ADC004_DisableResultEvt((ADC004_HandleType*)&ADC004_Handle0);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_DisableResultEvt(const ADC004_HandleType* HandlePtr);
+
+/**
+ * @brief This function returns the result of the normal mode ADC conversion.
+ *        Result read mode is configured as "wait-for-read". <b>Use this API to read result
+ *        of each conversion so that next background scan conversion result can be written into the global result register.</b>
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @param[in] ResultPtr Pointer to store conversion result.<BR>
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ * ADC004_INVALID_PARAM_ERROR_ERROR: if the ResultPtr is NULL.<BR>
+ * ADC004_INVALID_RESULT : If the result is not updated. <BR>
+ *
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    ADC004_ResultHandleType Result;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Get the result
+ *    Status =
+ *          ADC004_GetResult(
+ *            (ADC004_HandleType*)&ADC004_Handle0, &Result);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_GetResult(const ADC004_HandleType* HandlePtr, 
+                                            ADC004_ResultHandleType* ResultPtr);
+
+
+/**
+ * @brief This function returns the result of the normal mode ADC conversion 
+ * without checking the valid bitfield.
+ * Result read mode is configured as "wait-for-read". <b>Use this API to read 
+ * result of each conversion so that next background scan conversion result can 
+ * be written into the global result register.</b>
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @param[in] Result    pointer to store ADC result<BR>
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ *
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    uint16_t AdcResult;
+ *    DAVE_Init(); //ADC004_Init is called within DAVE_Init
+ *
+ *    //Get the result
+ *    ADC004_GetFastResult((ADC004_HandleType*)&ADC004_Handle0, &AdcResult);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */ 
+ status_t ADC004_GetFastResult(const ADC004_HandleType* HandlePtr,
+                               uint16_t *Result);
+
+                                            
+/**
+ * @brief This function checks whether Result event flag is set.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @param[in] EvtStatus Pointer to store the status of result event flag.<BR>
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ * ADC004_INVALID_PARAM_ERROR_ERROR: if EvtStatus is NULL.<BR><BR>
+ *
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    uint8_t ResultEvt;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Get result event flag
+ *    Status =
+ *          ADC004_GetResultEvtFlag(
+ *            (ADC004_HandleType*)&ADC004_Handle0, &ResultEvt);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_GetResultEvtFlag(const ADC004_HandleType* HandlePtr, 
+                                                            uint8_t* EvtStatus);
+
+/**
+ * @brief This function sets the result event flag through software.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Set result event flag
+ *    Status =
+ *          ADC004_SetResultEvtFlag((ADC004_HandleType*)&ADC004_Handle0);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_SetResultEvtFlag(const ADC004_HandleType* HandlePtr);
+
+
+/**
+ * @brief This function clears the pending result event flag.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Clear result event flag
+ *    Status =
+ *          ADC004_ClearResultEvtFlag((ADC004_HandleType*)&ADC004_Handle0, 1);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_ClearResultEvtFlag(const ADC004_HandleType* HandlePtr);
+
+
+/**
+ * @brief This function enables the background request
+ *        source event. This event is generated after all the conversions in the
+ *        background scan sequence are finished.
+ * @param[in] HandlePtr pointer to the Instance variable
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ * ADC004_INVALID_PARAM_ERROR_ERROR: if the EvtStatus is NULL.   <BR>
+ * <b>Reentrant: yes</b> <BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    uint8_t EvtflgStat;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    // Enable background request source event service request.
+ *    Status =
+ *          ADC004_EnableBackGroundEvent((ADC004_HandleType*)&ADC004_Handle0);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_EnableBackGroundEvent(const ADC004_HandleType* HandlePtr);
+
+/**
+ * @brief This function disables the background request
+ *        source event.
+ * @param[in] HandlePtr pointer to the Instance variable
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ * ADC004_INVALID_PARAM_ERROR_ERROR: if the EvtStatus is NULL.   <BR>
+ * <b>Reentrant: yes</b> <BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    uint8_t EvtflgStat;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Disable background request source event service request.
+ *    Status =
+ *          ADC004_DisableBackGroundEvent((ADC004_HandleType*)&ADC004_Handle0);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_DisableBackGroundEvent(const ADC004_HandleType* HandlePtr);
+
+/**
+ * @brief This function checks whether background source event flag is set.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @param[in] EvtStatus Pointer to store the status of background even flag<BR>
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ * ADC004_INVALID_PARAM_ERROR_ERROR: if the EvtStatus is NULL.   <BR>
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    uint8_t EvtflgStat;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *   //Get background request source event. 
+ *    Status =
+ *          ADC004_GetBackGroundEvtFlag(
+ *            (ADC004_HandleType*)&ADC004_Handle0, &EvtflgStat);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_GetBackGroundEvtFlag(const ADC004_HandleType* HandlePtr, 
+                                                           uint8_t* EvtStatus);
+
+/**
+ * @brief This function sets the background source event flag through software.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @return <b>status_t</b><BR>
+ * 
+ * DAVEApp_SUCCESS: if the function is successful<BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ * ADC004_UNINITIALIZED State.<BR>
+ * ADC004_INVALID_PARAM_ERROR_ERROR: if the Mode value is above Sequence mode<BR>
+ *
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *   //Sets background request source event. 
+ *    Status =
+ *          ADC004_SetBackGroundEvtFlag((ADC004_HandleType*)&ADC004_Handle0);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_SetBackGroundEvtFlag(const ADC004_HandleType* HandlePtr);
+
+/**
+ * @brief This function clears the background resource event flag.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful. <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ *
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Clears background request source event. 
+ *    Status =
+ *         ADC004_ClearBackGroundEvtFlag((ADC004_HandleType*)&ADC004_Handle0);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_ClearBackGroundEvtFlag(const ADC004_HandleType* HandlePtr);
+
+/**
+ * @brief This function clears pending bits.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ *
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Clear pending bits.
+ *    Status =
+ *          ADC004_ClearPendingBits((ADC004_HandleType*)&ADC004_Handle0;
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_ClearPendingBits(const ADC004_HandleType *HandlePtr);
+
+/**
+ * @brief This function generates a load event for the background scan sequence.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ *
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Generate load event
+ *    Status =
+ *          ADC004_GenerateLoadEvent((ADC004_HandleType*)&ADC004_Handle0);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_GenerateLoadEvent(const ADC004_HandleType *HandlePtr);
+
+/**
+ * @brief This function enables the gating feature.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @param[in] GateSelectVal Gate selection value<BR>
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ * ADC004_UNINITIALIZED State. <BR>
+ * ADC004_INVALID_PARAM_ERROR_ERROR: if the GateSelectVal value is above 
+ *                                   ADC004_GATING_ENABLED_FOR_LOW<BR>
+ *
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Enable gating
+ *    Status =
+ *          ADC004_EnableGate((ADC004_HandleType*)&ADC004_Handle0,
+ *                            ADC004_GATING_ENABLED_FOR_LOW);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+ 
+ 
+status_t ADC004_EnableGate(const ADC004_HandleType *HandlePtr, 
+                                              uint8_t GateSelectVal);
+                                              
+                                              
+/**
+ * @brief This function gives the selected gate signal input level.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @param[in] GeteLvlPtr Selected Gate level value<BR>
+ * @return <b>status_t</b><BR>
+ * 
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ * ADC004_UNINITIALIZED State. <BR>
+ * ADC004_INVALID_PARAM_ERROR_ERROR: if the GeteLvlPtr value is NULL.<BR>
+ *
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    uint8_t GateLevel;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Get selected gate input level.
+ *    Status =
+ *          ADC004_GetGateLevel((ADC004_HandleType*)&ADC004_Handle0,
+ *                                                                &GateLevel);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_GetGateLevel(const ADC004_HandleType* HandlePtr, 
+                                                          uint8_t* GeteLvlPtr);
+
+
+/**
+ * @brief This function sets the external trigger mode. It enables the external trigger
+ * when mode is non-zero.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @param[in] TriggerMode Value of external trigger mode<BR>
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ * ADC004_INVALID_PARAM_ERROR: If TriggerMode > 3 <BR>
+ *
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Set external trigger mode.
+ *    Status =
+ *          ADC004_SetExternalTriggerMode((ADC004_HandleType*)&ADC004_Handle0,
+ *                                               ADC004_TRIGGER_UPON_BOTH_EDGE);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_SetExternalTriggerMode(const ADC004_HandleType *HandlePtr, 
+                                                         uint8_t TriggerMode);
+
+
+/**
+ * @brief This function enables external trigger.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ * 
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Enable external trigger.
+ *    Status =
+ *          ADC004_EnableExternalTrigger((ADC004_HandleType*)&ADC004_Handle0);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_EnableExternalTrigger(const ADC004_HandleType *HandlePtr);
+
+/**
+ * @brief This function disables external trigger.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ *
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Disables the external trigger.
+ *    Status =
+ *          ADC004_DisableExternalTrigger((ADC004_HandleType*)&ADC004_Handle0);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_DisableExternalTrigger(const ADC004_HandleType *HandlePtr);
+
+
+
+/**
+ * @brief This function sets the Autoscan Source Load Event Mode.<BR>
+ *        Overwrite Mode or Combine Mode can be selected.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @param[in] EventMode Value of event mode<BR> 
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ * ADC004_INVALID_PARAM_ERROR: If the EventMode value is apart from 
+ *                             ADC004_OVERWRITE_MODE or ADC004_COMBINE_MODE. <BR>
+ *
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Set conversion mode for standard conversion in group input class 0.
+ *    Status =
+ *          ADC004_SetLoadEventMode(
+ *            (ADC004_HandleType*)&ADC004_Handle0, ADC004_COMBINE_MODE);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_SetLoadEventMode(const ADC004_HandleType *HandlePtr, 
+                                                             uint8_t EventMode);
+
+
+/**
+ * @brief This function sets the required channel in channel pending register.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @param[in] ChannelPtr Pointer to the channel handle<BR> 
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ * ADC004_INVALID_PARAM_ERROR: If the ChannelPtr is NULL.
+ *                             if the group number or channel number in
+ *                             channel handle is invalid or not consumed<BR><BR> 
+ *
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Set pending bit for channels to include in the conversion
+ *    Status =
+ *          ADC004_SetPendingChannel(
+ *            (ADC004_HandleType*)&ADC004_Handle0, &ADC004_ChannelAAHandle);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_SetPendingChannel(const ADC004_HandleType *HandlePtr,
+                                  const ADC004_ChannelHandleType* ChannelPtr);
+
+/**
+ * @brief This function clears the required channel in channel pending register.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @param[in] ChannelPtr Pointer to the Channel handle<BR> 
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ * ADC004_INVALID_PARAM_ERROR: If the ChannelPtr is NULL.
+ *                             if the group number or channel number in
+ *                             channel handle is invalid or not consumed<BR><BR> 
+ *
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Clear pending bit for channels to exclude from the conversion.
+ *    Status =
+ *          ADC004_ClearPendingChannel(
+ *            (ADC004_HandleType*)&ADC004_Handle0, &ADC004_ChannelAAHandle);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_ClearPendingChannel(const ADC004_HandleType *HandlePtr,
+                                    const ADC004_ChannelHandleType* ChannelPtr);
+                                          
+/**
+ * @brief This function selects the channel for conversion. It adds one channel at 
+ * a time in the background scan sequence.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @param[in] ChannelPtr Pointer to the channel handle<BR> 
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ * ADC004_INVALID_PARAM_ERROR: If the ChannelPtr is NULL.
+ *                             if the group number or channel number in
+ *                             channel handle is invalid or not consumed<BR><BR>  
+ *
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Select channel for conversion.
+ *    Status =
+ *          ADC004_SetChannelSelect((ADC004_HandleType*)&ADC004_Handle0, 
+ *                                   &ADC004_ChannelAAHandle);
+ *    Status =
+ *          ADC004_SetChannelSelect((ADC004_HandleType*)&ADC004_Handle0, 
+ *                                   &ADC004_ChannelBDHandle);
+ *    Status =
+ *          ADC004_SetChannelSelect((ADC004_HandleType*)&ADC004_Handle0, 
+ *                                   &ADC004_ChannelBAHandle);
+ *                                   
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_SetChannelSelect(const ADC004_HandleType *HandlePtr,
+                                 const ADC004_ChannelHandleType* ChannelPtr);
+                                          
+/**
+ * @brief This function clears the required channel from channel pending register.
+ * @param[in] HandlePtr pointer to the Instance variable<BR>
+ * @param[in] ChannelPtr Pointer to the channel handle<BR> 
+ * @return <b>status_t</b><BR>
+ *
+ * DAVEApp_SUCCESS: if the function is successful <BR>
+ * ADC004_OPER_NOT_ALLOWED: If the function is called when in
+ *                          ADC004_UNINITIALIZED State. <BR>
+ * ADC004_INVALID_PARAM_ERROR: If the ChannelPtr is NULL.
+ *                             if the group number or channel number in
+ *                             channel handle is invalid or not consumed<BR><BR>
+ *
+ * <b>Reentrant: yes</b><BR>
+ * <b>Sync/Async:  Synchronous</b>
+ *
+ * @code
+ * #include <DAVE3.h>
+ *
+ * int main(void)
+ * {
+ *    status_t Status;
+ *    DAVE_Init();//ADC004_Init is called within DAVE_Init
+ *
+ *    //Clear channel from scan sequence.
+ *    Status =
+ *          ADC004_ClearChannelSelect((ADC004_HandleType*)&ADC004_Handle0, 
+ *                                    &ADC004_ChannelAAHandle);
+ *    while(1);
+ *    return 0;
+ * }
+ * @endcode
+ */
+status_t ADC004_ClearChannelSelect(const ADC004_HandleType *HandlePtr,
+                                   const ADC004_ChannelHandleType* ChannelPtr);
+
+#include "ADC004_Conf.h"
+/**
+ * @}
+ */
+
+ #ifdef __cplusplus
+}
+#endif
+
+#endif /* ADC004_H_ */

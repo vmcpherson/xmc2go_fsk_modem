@@ -1,0 +1,737 @@
+<%@ jet package="CodeGenerator" class="adc004_confc_template"
+imports="java.util.* java.text.* com.ifx.davex.appjetinteract.App2JetInterface" %>
+<% App2JetInterface app = (App2JetInterface) argument; %>
+/*CODE_BLOCK_BEGIN[ADC004_Conf.c]*/
+
+/*******************************************************************************
+ Copyright (c) 2013, Infineon Technologies AG                                 **
+ All rights reserved.                                                         **
+                                                                              **
+ Redistribution and use in source and binary forms, with or without           **
+ modification,are permitted provided that the following conditions are met:   **
+                                                                              **
+ *Redistributions of source code must retain the above copyright notice,      **
+ this list of conditions and the following disclaimer.                        **
+ *Redistributions in binary form must reproduce the above copyright notice,   **
+ this list of conditions and the following disclaimer in the documentation    **
+ and/or other materials provided with the distribution.                       **
+ *Neither the name of the copyright holders nor the names of its contributors **
+ may be used to endorse or promote products derived from this software without**
+ specific prior written permission.                                           **
+                                                                              **
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"  **
+ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE    **
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   **
+ ARE  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE   **
+ LIABLE  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR         **
+ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF         **
+ SUBSTITUTE GOODS OR  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS    **
+ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN      **
+ CONTRACT, STRICT LIABILITY,OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)       **
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   **
+ POSSIBILITY OF SUCH DAMAGE.                                                  **
+                                                                              **
+ To improve the quality of the software, users are encouraged to share        **
+ modifications, enhancements or bug fixes with Infineon Technologies AG       **
+ dave@infineon.com).                                                          **
+                                                                              **
+********************************************************************************
+**                                                                            **
+**                                                                            **
+** PLATFORM : Infineon XMC1000 Series                                         **
+**                                                                            **
+** COMPILER : Compiler Independent                                            **
+**                                                                            **
+** AUTHOR   : DAVE App Developer                                              **
+**                                                                            **
+** MAY BE CHANGED BY USER [yes/no]: Yes                                       **
+**                                                                            **
+** MODIFICATION DATE : Nov 13, 2013                                           **
+**                                                                            **
+*******************************************************************************/
+
+/*******************************************************************************
+**                       Author(s) Identity                                   **
+********************************************************************************
+**                                                                            **
+** Initials     Name                                                          **
+** ---------------------------------------------------------------------------**
+** CM           DAVE App Developer                                            **
+*******************************************************************************/
+<% String AppBaseuri = "app/ADC004/"; %>
+/**
+ * @file  ADC004_Conf.c
+ * @App Version ADC004 <<%=app.getAppVersion(AppBaseuri)%>>
+ * @brief This file contains App parameter data as per GUI configurations
+ * Change History:
+ * Date       version              Details
+ * 13-Jun-2013  1.0.0     Initial code added for XMC1100
+ * 27-Jun-2013  1.0.2     Help doc updated
+ *                        Enable Arbitration slot removed from UI
+ * 13-Nov-2013  1.0.4     In GUI Group 0/1 is made as Group A/B and 
+ *                        manifest modified as per this change.
+ */
+
+#include <DAVE3.h>
+
+<% String Periuri = "http://www.infineon.com/0.1.31/Peripheral/vadc/"; %>
+<% String appInst  = null; %>
+<% String BkgdUri = null; %>
+<% int GrpAChannels = app.getIntegerValue(AppBaseuri + "0/adc004_irwnumberofchannelgroupa"); %>
+<% int GrpBChannels = app.getIntegerValue(AppBaseuri + "0/adc004_irwnumberofchannelgroupb"); %>
+<% int TotalChannels = GrpAChannels + GrpBChannels ; %>
+<% int ChEntry = 0; %>
+<% String Group0AppUri = null; %>
+<% String Group0Uri = null; %>
+<% String Group0Inst = null; %>
+<% String Group0No = null; %>
+<% String Group1AppUri = null; %>
+<% String Group1Uri = null; %>
+<% String Group1Inst = null; %>
+<% String Group1No = null; %>
+<% int GroupA = 0; %>
+<% int GroupB = 0; %>
+
+<% String ChANum = null;%>
+<% String ChBNum = null;%>
+<% String ChCNum = null;%>
+<% String ChDNum = null;%>
+<% String ChENum = null;%>
+<% String ChFNum = null;%>
+<% String ChGNum = null;%>
+<% String ChHNum = null;%>
+<% String ChINum = null;%>
+<% String ChJNum = null;%>
+<% String ChKNum = null;%>
+<% String ChLNum = null;%>
+<% String ChMNum = null;%>
+<% String ChNNum = null;%>
+<% String ChONum = null;%>
+<% String ChPNum = null;%>
+<% int g0asssel = 0; %>
+<% int g1asssel = 0; %>
+<% int g0chact = 0; %>
+<% int g1chact = 0; %>
+<% int g3groupact = 0; %>
+
+<% BkgdUri = app.getMappedUri(AppBaseuri +  "0/backgnd" ); %>
+<% Group0AppUri = app.getMappedUri(AppBaseuri +  "0/groupappa" ); %>
+<% if ((Group0AppUri != null) && (Group0AppUri.trim() != "")) { %>
+<% Group0Inst = Group0AppUri.substring(Group0AppUri.lastIndexOf("/") + 1);%>
+<% Group0Uri = app.getMappedUri(Group0AppUri +"/adcgroupconfig"); %>
+<% if ((Group0Uri != null) && (Group0Uri.trim() != "")) { %>
+<% Group0Uri = Group0Uri.substring(Periuri.length(), Group0Uri.indexOf("/config"));%>
+<% Group0No = Group0Uri.substring(Group0Uri.length() -1); %>
+<% }%>
+<% }%>
+<% Group1AppUri = app.getMappedUri(AppBaseuri +  "0/groupappb" ); %>
+<% if ((Group1AppUri != null) && (Group1AppUri.trim() != "")) { %>
+<% Group1Inst = Group1AppUri.substring(Group1AppUri.lastIndexOf("/") + 1);%>
+<% Group1Uri = app.getMappedUri(Group1AppUri +"/adcgroupconfig"); %>
+<% if ((Group1Uri != null) && (Group1Uri.trim() != "")) { %>
+<% Group1Uri = Group1Uri.substring(Periuri.length(), Group1Uri.indexOf("/config"));%>
+<% Group1No = Group1Uri.substring(Group1Uri.length() -1); %>
+<% }%>
+<% }%>
+
+ADC004_DynamicDataType ADC004_DynamicHandle =
+{
+  .State = ADC004_UNINITIALIZED
+};
+
+<% if (GrpAChannels > 0) { %>
+<% String ChAAppUri = null;
+String ChAgroup = null;
+int chsel = app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannela/0");
+ChAAppUri = app.getMappedUri(AppBaseuri  +"0/channel_aa");
+if ((ChAAppUri != null) && (ChAAppUri.trim() != "")) {
+ChANum = ChAAppUri.substring(ChAAppUri.lastIndexOf("/")+1);
+ChAgroup = ChAAppUri.substring(Periuri.length(),ChAAppUri.indexOf("/ch/")); 
+ChAgroup = ChAgroup.substring(ChAgroup.lastIndexOf("/") + 1 );
+
+  GroupA = Integer.valueOf(ChAgroup);
+  g3groupact |= (1 << GroupA); 
+  if(Integer.valueOf(ChAgroup) == 0)
+  {
+    g0asssel |= (chsel << Integer.valueOf(ChANum));
+    g0chact |= (1 << Integer.valueOf(ChANum));
+  }
+  else if(Integer.valueOf(ChAgroup) == 1)
+  {
+    g1asssel |= (chsel << Integer.valueOf(ChANum));
+    g1chact |= (1 << Integer.valueOf(ChANum));
+  } 
+%>
+const ADC004_ChannelHandleType ADC004_ChannelAAHandle = {
+  .kGroupNo = (uint8_t)<%= ChAgroup%>,
+  .kChannelNo = (uint8_t)<%= ChANum%>,
+  .kEnable = (uint8_t)<%= chsel%>
+};
+<%}}%>
+
+<% if (GrpAChannels > 1) { %>
+<% String ChBAppUri = null;
+String ChBgroup = null;
+int chsel = app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelb/0"); 
+ChBAppUri = app.getMappedUri(AppBaseuri  +"0/channel_ab");
+if ((ChBAppUri != null) && (ChBAppUri.trim() != "")) {
+ChBNum = ChBAppUri.substring(ChBAppUri.lastIndexOf("/")+1);
+ChBgroup = ChBAppUri.substring(Periuri.length(),ChBAppUri.indexOf("/ch/")); 
+ChBgroup = ChBgroup.substring(ChBgroup.lastIndexOf("/") + 1 );
+if(ChBgroup != null)
+{
+  if(Integer.valueOf(ChBgroup) == 0)
+  {
+    g0asssel |= (chsel << Integer.valueOf(ChBNum));
+    g0chact |= (1 << Integer.valueOf(ChBNum));
+  }
+  else if(Integer.valueOf(ChBgroup) == 1)
+  {
+    g1asssel |= (chsel << Integer.valueOf(ChBNum));
+    g1chact |= (1 << Integer.valueOf(ChBNum));
+  } 
+}
+%>
+const ADC004_ChannelHandleType ADC004_ChannelABHandle = {
+  .kGroupNo = (uint8_t)<%= ChBgroup%>,
+  .kChannelNo = (uint8_t)<%= ChBNum%>,
+  .kEnable = (uint8_t)<%= app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelb/0")%>
+};
+<%}}%>
+<% if (GrpAChannels > 2) { %>
+<% String ChCAppUri = null;
+String ChCgroup = null; 
+int chsel = app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelc/0");
+ChCAppUri = app.getMappedUri(AppBaseuri  +"0/channel_ac");
+if ((ChCAppUri != null) && (ChCAppUri.trim() != "")) {
+ChCNum = ChCAppUri.substring(ChCAppUri.lastIndexOf("/")+1);
+ChCgroup = ChCAppUri.substring(Periuri.length(),ChCAppUri.indexOf("/ch/")); 
+ChCgroup = ChCgroup.substring(ChCgroup.lastIndexOf("/") + 1 ); 
+if(ChCgroup != null)
+{
+  if(Integer.valueOf(ChCgroup) == 0)
+  {
+    g0asssel |= (1 << Integer.valueOf(ChCNum));
+    g0chact |= (1 << Integer.valueOf(ChCNum));
+  }
+  else if(Integer.valueOf(ChCgroup) == 1)
+  {
+    g1asssel |= (chsel << Integer.valueOf(ChCNum));
+    g1chact |= (1 << Integer.valueOf(ChCNum));
+  }  
+}
+%>
+const ADC004_ChannelHandleType ADC004_ChannelACHandle = {
+  .kGroupNo = (uint8_t)<%= ChCgroup%>,
+  .kChannelNo = (uint8_t)<%= ChCNum%>,
+  .kEnable = (uint8_t)<%= app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelc/0")%>
+};
+<%}}%>
+<% if (GrpAChannels > 3) { %>
+<% String ChDAppUri = null;
+String ChDgroup = null; 
+int chsel = app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchanneld/0");
+ChDAppUri = app.getMappedUri(AppBaseuri  +"0/channel_ad");
+if ((ChDAppUri != null) && (ChDAppUri.trim() != "")) {
+ChDNum = ChDAppUri.substring(ChDAppUri.lastIndexOf("/")+1);
+ChDgroup = ChDAppUri.substring(Periuri.length(),ChDAppUri.indexOf("/ch/"));
+ChDgroup = ChDgroup.substring(ChDgroup.lastIndexOf("/") + 1 ); 
+if(ChDgroup != null)
+{
+  if(Integer.valueOf(ChDgroup) == 0)
+  {
+    g0asssel |= (chsel << Integer.valueOf(ChDNum));
+    g0chact |= (1 << Integer.valueOf(ChDNum));
+  }
+  else if(Integer.valueOf(ChDgroup) == 1)
+  {
+    g1asssel |= (chsel << Integer.valueOf(ChDNum));
+    g1chact |= (1 << Integer.valueOf(ChDNum));
+  }  
+}
+%>
+
+const ADC004_ChannelHandleType ADC004_ChannelADHandle = {
+  .kGroupNo = (uint8_t)<%= ChDgroup%>,
+  .kChannelNo = (uint8_t)<%= ChDNum%>,
+  .kEnable = (uint8_t)<%= app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchanneld/0")%>
+};
+<%}}%>
+<% if (GrpAChannels > 4) { %>
+<% String ChEAppUri = null;
+String ChEgroup = null; 
+int chsel = app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannele/0");
+ChEAppUri = app.getMappedUri(AppBaseuri  +"0/channel_ae");
+if ((ChEAppUri != null) && (ChEAppUri.trim() != "")) {
+ChENum = ChEAppUri.substring(ChEAppUri.lastIndexOf("/")+1);
+ChEgroup = ChEAppUri.substring(Periuri.length(),ChEAppUri.indexOf("/ch/")); 
+ChEgroup = ChEgroup.substring(ChEgroup.lastIndexOf("/") + 1 ); 
+if(ChEgroup != null)
+{
+  if(Integer.valueOf(ChEgroup) == 0)
+  {
+    g0asssel |= (chsel << Integer.valueOf(ChENum));
+    g0chact |= (1 << Integer.valueOf(ChENum));
+  }
+  else if(Integer.valueOf(ChEgroup) == 1)
+  {
+    g1asssel |= (chsel << Integer.valueOf(ChENum));
+    g1chact |= (1 << Integer.valueOf(ChENum));
+  } 
+}
+%>
+const ADC004_ChannelHandleType ADC004_ChannelAEHandle = {
+  .kGroupNo = (uint8_t)<%= ChEgroup%>,
+  .kChannelNo = (uint8_t)<%= ChENum%>,
+  .kEnable = (uint8_t)<%= app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannele/0")%>
+};
+<%}}%>
+<% if (GrpAChannels > 5) { %>
+<% String ChFAppUri = null;
+String ChFgroup = null; 
+int chsel = app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelf/0");
+ChFAppUri = app.getMappedUri(AppBaseuri  +"0/channel_af");
+if ((ChFAppUri != null) && (ChFAppUri.trim() != "")) {
+ChFNum = ChFAppUri.substring(ChFAppUri.lastIndexOf("/")+1);
+ChFgroup = ChFAppUri.substring(Periuri.length(),ChFAppUri.indexOf("/ch/")); 
+ChFgroup = ChFgroup.substring(ChFgroup.lastIndexOf("/") + 1 );
+if(ChFgroup != null)
+{
+  if(Integer.valueOf(ChFgroup) == 0)
+  {
+    g0asssel |= (chsel << Integer.valueOf(ChFNum));
+    g0chact |= (1 << Integer.valueOf(ChFNum));
+  }
+  else if(Integer.valueOf(ChFgroup) == 1)
+  {
+    g1asssel |= (chsel << Integer.valueOf(ChFNum));
+    g1chact |= (1 << Integer.valueOf(ChFNum));
+  } 
+}
+%>
+const ADC004_ChannelHandleType ADC004_ChannelAFHandle = {
+  .kGroupNo = (uint8_t)<%= ChFgroup%>,
+  .kChannelNo = (uint8_t)<%= ChFNum%>,
+  .kEnable = (uint8_t)<%= app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelf/0")%>
+};
+<%}}%>
+<% if (GrpAChannels > 6) { %>
+<% String ChGAppUri = null;
+String ChGgroup = null;
+int chsel = app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelg/0"); 
+ChGAppUri = app.getMappedUri(AppBaseuri  +"0/channel_ag");
+if ((ChGAppUri != null) && (ChGAppUri.trim() != "")) {
+ChGNum = ChGAppUri.substring(ChGAppUri.lastIndexOf("/")+1);
+ChGgroup = ChGAppUri.substring(Periuri.length(),ChGAppUri.indexOf("/ch/")); 
+ChGgroup = ChGgroup.substring(ChGgroup.lastIndexOf("/") + 1 ); 
+if(ChGgroup != null)
+{
+  if(Integer.valueOf(ChGgroup) == 0)
+  {
+    g0asssel |= (chsel << Integer.valueOf(ChGNum));
+    g0chact |= (1 << Integer.valueOf(ChGNum));
+  }
+  else if(Integer.valueOf(ChGgroup) == 1)
+  {
+    g1asssel |= (chsel << Integer.valueOf(ChGNum));
+    g1chact |= (1 << Integer.valueOf(ChGNum));
+  }
+}
+%>
+
+const ADC004_ChannelHandleType ADC004_ChannelAGHandle = {
+  .kGroupNo = (uint8_t)<%= ChGgroup%>,
+  .kChannelNo = (uint8_t)<%= ChGNum%>,
+  .kEnable = (uint8_t)<%= app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelg/0")%>
+};
+<%}}%>
+<% if (GrpAChannels > 7) { %>
+<% String ChHAppUri = null;
+String ChHgroup = null;
+int chsel = app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelh/0"); 
+ChHAppUri = app.getMappedUri(AppBaseuri  +"0/channel_ah");
+if ((ChHAppUri != null) && (ChHAppUri.trim() != "")) {
+ChHNum = ChHAppUri.substring(ChHAppUri.lastIndexOf("/")+1);
+ChHgroup = ChHAppUri.substring(Periuri.length(),ChHAppUri.indexOf("/ch/")); 
+ChHgroup = ChHgroup.substring(ChHgroup.lastIndexOf("/") + 1 ); 
+if(ChHgroup != null)
+{
+  if(Integer.valueOf(ChHgroup) == 0)
+  {
+    g0asssel |= (chsel << Integer.valueOf(ChHNum));
+    g0chact |= (1 << Integer.valueOf(ChHNum));
+  }
+  else if(Integer.valueOf(ChHgroup) == 1)
+  {
+    g1asssel |= (chsel << Integer.valueOf(ChHNum));
+    g1chact |= (1 << Integer.valueOf(ChHNum));
+  } 
+}
+%>
+
+const ADC004_ChannelHandleType ADC004_ChannelAHHandle = {
+  .kGroupNo = (uint8_t)<%= ChHgroup%>,
+  .kChannelNo = (uint8_t)<%= ChHNum%>,
+  .kEnable = (uint8_t)<%= app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelh/0")%>
+};
+<%}}%>
+<% if (GrpBChannels > 0) { %>
+<% String ChIAppUri = null;
+String ChIgroup = null; 
+int chsel = app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchanneli/0");
+ChIAppUri = app.getMappedUri(AppBaseuri  +"0/channel_ba");
+if ((ChIAppUri != null) && (ChIAppUri.trim() != "")) {
+ChINum = ChIAppUri.substring(ChIAppUri.lastIndexOf("/")+1);
+ChIgroup = ChIAppUri.substring(Periuri.length(),ChIAppUri.indexOf("/ch/")); 
+ChIgroup = ChIgroup.substring(ChIgroup.lastIndexOf("/") + 1 ); 
+if(ChIgroup != null)
+{
+  GroupB = Integer.valueOf(ChIgroup);
+  g3groupact |= (1 << GroupB);
+  if(Integer.valueOf(ChIgroup) == 0)
+  {
+    g0asssel |= (chsel << Integer.valueOf(ChINum));
+    g0chact |= (1 << Integer.valueOf(ChINum));
+  }
+  else if(Integer.valueOf(ChIgroup) == 1)
+  {
+    g1asssel |= (chsel << Integer.valueOf(ChINum));
+    g1chact |= (1 << Integer.valueOf(ChINum));
+  }  
+}
+%>
+
+const ADC004_ChannelHandleType ADC004_ChannelBAHandle = {
+  .kGroupNo = (uint8_t)<%= ChIgroup%>,
+  .kChannelNo = (uint8_t)<%= ChINum%>,
+  .kEnable = (uint8_t)<%= app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchanneli/0")%>
+};
+<%}}%>
+<% if (GrpBChannels > 1) { %>
+<% String ChJAppUri = null;
+String ChJgroup = null; 
+int chsel = app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelj/0");
+ChJAppUri = app.getMappedUri(AppBaseuri  +"0/channel_bb");
+if ((ChJAppUri != null) && (ChJAppUri.trim() != "")) {
+ChJNum = ChJAppUri.substring(ChJAppUri.lastIndexOf("/")+1);
+ChJgroup = ChJAppUri.substring(Periuri.length(),ChJAppUri.indexOf("/ch/")); 
+ChJgroup = ChJgroup.substring(ChJgroup.lastIndexOf("/") + 1 ); 
+if(ChJgroup != null)
+{
+  if(Integer.valueOf(ChJgroup) == 0)
+  {
+    g0asssel |= (chsel << Integer.valueOf(ChJNum));
+    g0chact |= (1 << Integer.valueOf(ChJNum));
+  }
+  else if(Integer.valueOf(ChJgroup) == 1)
+  {
+    g1asssel |= (chsel << Integer.valueOf(ChJNum));
+    g1chact |= (1 << Integer.valueOf(ChJNum));
+  }  
+}
+%>
+const ADC004_ChannelHandleType ADC004_ChannelBBHandle = {
+  .kGroupNo = (uint8_t)<%= ChJgroup%>,
+  .kChannelNo = (uint8_t)<%= ChJNum%>,
+  .kEnable = (uint8_t)<%= app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelj/0")%>
+};
+<%}}%>
+<% if (GrpBChannels > 2) { %>
+<% String ChKAppUri = null;
+String ChKgroup = null; 
+int chsel = app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelk/0");
+ChKAppUri = app.getMappedUri(AppBaseuri  +"0/channel_bc");
+if ((ChKAppUri != null) && (ChKAppUri.trim() != "")) {
+ChKNum = ChKAppUri.substring(ChKAppUri.lastIndexOf("/")+1);
+ChKgroup = ChKAppUri.substring(Periuri.length(),ChKAppUri.indexOf("/ch/")); 
+ChKgroup = ChKgroup.substring(ChKgroup.lastIndexOf("/") + 1 ); 
+if(ChKgroup != null)
+{
+  if(Integer.valueOf(ChKgroup) == 0)
+  {
+    g0asssel |= (chsel << Integer.valueOf(ChKNum));
+    g0chact |= (1 << Integer.valueOf(ChKNum));
+  }
+  else if(Integer.valueOf(ChKgroup) == 1)
+  {
+    g1asssel |= (chsel << Integer.valueOf(ChKNum));
+    g1chact |= (1 << Integer.valueOf(ChKNum));
+  } 
+}
+%>
+const ADC004_ChannelHandleType ADC004_ChannelBCHandle = {
+  .kGroupNo = (uint8_t)<%= ChKgroup%>,
+  .kChannelNo = (uint8_t)<%= ChKNum%>,
+  .kEnable = (uint8_t)<%= app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelk/0")%>
+};
+<%}}%>
+<% if (GrpBChannels > 3) { %>
+<% String ChLAppUri = null;
+String ChLgroup = null;
+int chsel = app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannell/0"); 
+ChLAppUri = app.getMappedUri(AppBaseuri  +"0/channel_bd");
+if ((ChLAppUri != null) && (ChLAppUri.trim() != "")) {
+ChLNum = ChLAppUri.substring(ChLAppUri.lastIndexOf("/")+1);
+ChLgroup = ChLAppUri.substring(Periuri.length(),ChLAppUri.indexOf("/ch/")); 
+ChLgroup = ChLgroup.substring(ChLgroup.lastIndexOf("/") + 1 ); 
+if(ChLgroup != null)
+{
+  if(Integer.valueOf(ChLgroup) == 0)
+  {
+    g0asssel |= (chsel << Integer.valueOf(ChLNum));
+    g0chact |= (1 << Integer.valueOf(ChLNum));
+  }
+  else if(Integer.valueOf(ChLgroup) == 1)
+  {
+    g1asssel |= (chsel << Integer.valueOf(ChLNum));
+    g1chact |= (1 << Integer.valueOf(ChLNum));
+  } 
+}
+%>
+const ADC004_ChannelHandleType ADC004_ChannelBDHandle = {
+  .kGroupNo = (uint8_t)<%= ChLgroup%>,
+  .kChannelNo = (uint8_t)<%= ChLNum%>,
+  .kEnable = (uint8_t)<%= app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannell/0")%>
+};
+<%}}%>
+<% if (GrpBChannels > 4) { %>
+<% String ChMAppUri = null;
+String ChMgroup = null;
+int chsel = app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelm/0"); 
+ChMAppUri = app.getMappedUri(AppBaseuri  +"0/channel_be");
+if ((ChMAppUri != null) && (ChMAppUri.trim() != "")) {
+ChMNum = ChMAppUri.substring(ChMAppUri.lastIndexOf("/")+1);
+ChMgroup = ChMAppUri.substring(Periuri.length(),ChMAppUri.indexOf("/ch/"));
+ChMgroup = ChMgroup.substring(ChMgroup.lastIndexOf("/") + 1 ); 
+if(ChMgroup != null)
+{
+  if(Integer.valueOf(ChMgroup) == 0)
+  {
+    g0asssel |= (chsel << Integer.valueOf(ChMNum));
+    g0chact |= (1 << Integer.valueOf(ChMNum));
+  }
+  else if(Integer.valueOf(ChMgroup) == 1)
+  {
+    g1asssel |= (chsel << Integer.valueOf(ChMNum));
+    g1chact |= (1 << Integer.valueOf(ChMNum));
+  } 
+}
+%>
+const ADC004_ChannelHandleType ADC004_ChannelBEHandle = {
+  .kGroupNo = (uint8_t)<%= ChMgroup%>,
+  .kChannelNo = (uint8_t)<%= ChMNum%>,
+  .kEnable = (uint8_t)<%= app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelm/0")%>
+};
+<%}}%>
+<% if (GrpBChannels > 5) { %>
+<% String ChNAppUri = null;
+String ChNgroup = null; 
+int chsel = app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchanneln/0");
+ChNAppUri = app.getMappedUri(AppBaseuri  +"0/channel_bf");
+if ((ChNAppUri != null) && (ChNAppUri.trim() != "")) {
+ChNNum = ChNAppUri.substring(ChNAppUri.lastIndexOf("/")+1);
+ChNgroup = ChNAppUri.substring(Periuri.length(),ChNAppUri.indexOf("/ch/")); 
+ChNgroup = ChNgroup.substring(ChNgroup.lastIndexOf("/") + 1 ); 
+if(ChNgroup != null)
+{
+  if(Integer.valueOf(ChNgroup) == 0)
+  {
+    g0asssel |= (chsel << Integer.valueOf(ChNNum));
+    g0chact |= (1 << Integer.valueOf(ChNNum));
+  }
+  else if(Integer.valueOf(ChNgroup) == 1)
+  {
+    g1asssel |= (chsel << Integer.valueOf(ChNNum));
+    g1chact |= (1 << Integer.valueOf(ChNNum));
+  }
+}
+%>
+const ADC004_ChannelHandleType ADC004_ChannelBFHandle = {
+  .kGroupNo = (uint8_t)<%= ChNgroup%>,
+  .kChannelNo = (uint8_t)<%= ChNNum%>,
+  .kEnable = (uint8_t)<%= app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchanneln/0")%>
+};
+<%}}%>
+<% if (GrpBChannels > 6) { %>
+<% String ChOAppUri = null;
+String ChOgroup = null; 
+int chsel = app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelo/0");
+ChOAppUri = app.getMappedUri(AppBaseuri  +"0/channel_bg");
+if ((ChOAppUri != null) && (ChOAppUri.trim() != "")) {
+ChONum = ChOAppUri.substring(ChOAppUri.lastIndexOf("/")+1);
+ChOgroup = ChOAppUri.substring(Periuri.length(),ChOAppUri.indexOf("/ch/"));
+ChOgroup = ChOgroup.substring(ChOgroup.lastIndexOf("/") + 1 ); 
+if(ChOgroup != null)
+{
+  if(Integer.valueOf(ChOgroup) == 0)
+  {
+    g0asssel |= (chsel << Integer.valueOf(ChONum));
+    g0chact |= (1 << Integer.valueOf(ChONum));
+  }
+  else if(Integer.valueOf(ChOgroup) == 1)
+  {
+    g1asssel |= (chsel << Integer.valueOf(ChONum));
+    g1chact |= (1 << Integer.valueOf(ChONum));
+  }
+
+}
+%>
+const ADC004_ChannelHandleType ADC004_ChannelBGHandle = {
+  .kGroupNo = (uint8_t)<%= ChOgroup%>,
+  .kChannelNo = (uint8_t)<%= ChONum%>,
+  .kEnable = (uint8_t)<%= app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelo/0")%>
+};
+<%}}%>
+<% if (GrpBChannels > 7) { %>
+<% String ChPAppUri = null;
+String ChPgroup = null;
+int chsel = app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelp/0"); 
+ChPAppUri = app.getMappedUri(AppBaseuri  +"0/channel_bh");
+if ((ChPAppUri != null) && (ChPAppUri.trim() != "")) {
+ChPNum = ChPAppUri.substring(ChPAppUri.lastIndexOf("/")+1);
+ChPgroup = ChPAppUri.substring(Periuri.length(),ChPAppUri.indexOf("/ch/")); 
+ChPgroup = ChPgroup.substring(ChPgroup.lastIndexOf("/") + 1 );
+if(ChPgroup != null)
+{
+  if(Integer.valueOf(ChPgroup) == 0)
+  {
+    g0asssel |= (chsel << Integer.valueOf(ChPNum));
+    g0chact |= (1 << Integer.valueOf(ChPNum));
+  }
+  else if(Integer.valueOf(ChPgroup) == 1)
+  {
+    g1asssel |= (chsel << Integer.valueOf(ChPNum));
+    g1chact |= (1 << Integer.valueOf(ChPNum));
+  }
+}
+%>
+const ADC004_ChannelHandleType ADC004_ChannelBHHandle = {
+  .kGroupNo = (uint8_t)<%= ChPgroup%>,
+  .kChannelNo = (uint8_t)<%= ChPNum%>,
+  .kEnable = (uint8_t)<%= app.getIntegerValue(AppBaseuri + "0/adc004_erwselectchannelp/0")%>
+};
+<%}}%>
+<% if (TotalChannels > 0) { %>
+const ADC004_ChannelHandleType* ADC004_ChannelHandlePtr[<%=TotalChannels%>] = {
+<% if ((GrpAChannels > 0) && (ChANum != null)) { %>
+  &ADC004_ChannelAAHandle,
+<%}%>
+<% if ((GrpAChannels > 1) && (ChBNum != null)) { %>
+  &ADC004_ChannelABHandle,
+<%}%>
+<% if ((GrpAChannels > 2) && (ChCNum != null)) { %>
+  &ADC004_ChannelACHandle,
+<%}%>
+<% if ((GrpAChannels > 3) && (ChDNum != null)) { %>
+  &ADC004_ChannelADHandle,
+<%}%>
+<% if ((GrpAChannels > 4) && (ChENum != null)) { %>
+  &ADC004_ChannelAEHandle,
+<%}%>
+<% if((GrpAChannels > 5) && (ChFNum != null)) { %>
+  &ADC004_ChannelAFHandle,
+<%}%>
+<% if ((GrpAChannels > 6) && (ChGNum != null)){ %>
+  &ADC004_ChannelAGHandle,
+<%}%>
+<% if ((GrpAChannels > 7) && (ChHNum != null)) { %>
+  &ADC004_ChannelAHHandle,
+<%}%>
+<% if ((GrpBChannels > 0) && (ChINum != null)) { %>
+  &ADC004_ChannelBAHandle,
+<%}%>
+<% if ((GrpBChannels > 1)  && (ChJNum != null)){ %>
+  &ADC004_ChannelBBHandle,
+<%}%>
+<% if ((GrpBChannels > 2) && (ChKNum != null)) { %>
+  &ADC004_ChannelBCHandle,
+<%}%>
+<% if ((GrpBChannels > 3) && (ChLNum != null)) { %>
+  &ADC004_ChannelBDHandle,
+<%}%>
+<% if ((GrpBChannels > 4) && (ChMNum != null)) { %>
+  &ADC004_ChannelBEHandle,
+<%}%>
+<% if ((GrpBChannels > 5) && (ChNNum != null)) { %>
+  &ADC004_ChannelBFHandle,
+<%}%>
+<% if ((GrpBChannels > 6) && (ChONum != null))  { %>
+  &ADC004_ChannelBGHandle,
+<%}%>
+<% if ((GrpBChannels > 7) && (ChPNum != null)) { %>
+  &ADC004_ChannelBHHandle,
+<%}%>
+};
+<%}%>
+const ADC004_HandleType ADC004_Handle0 =
+{
+  .kAnaRef =(uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_aref/0") == 1){%>ADC004_SHS_EXT_REF_UPPER,<%} else if  (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_aref/2") == 1){%>ADC004_SHS_INTERNAL_REF_UPPER,<%} else if  (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_aref/3") == 1){%>ADC004_SHS_INTERNAL_REF_LOWER,<%}%>
+  .kAnaControl =(uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_AnalogconvPowerdownanoff/0") == 1){%>ADC004_SHS_ANALOG_CONVERTER_ON,<%} else {%>ADC004_SHS_ANALOG_CONVERTER_OFF,<%}%>
+  .kGainG0Ch0 = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_GainControlG0C0/0") == 1){%>GAIN_FACTOR_1,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C0/1") == 1){%>GAIN_FACTOR_3,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C0/2") == 1){%>GAIN_FACTOR_6,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C0/3") == 1){%>GAIN_FACTOR_12,<%} %>
+  .kGainG0Ch1 = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_GainControlG0C1/0") == 1){%>GAIN_FACTOR_1,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C1/1") == 1){%>GAIN_FACTOR_3,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C1/2") == 1){%>GAIN_FACTOR_6,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C1/3") == 1){%>GAIN_FACTOR_12,<%} %>
+  .kGainG0Ch2 = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_GainControlG0C2/0") == 1){%>GAIN_FACTOR_1,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C2/1") == 1){%>GAIN_FACTOR_3,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C2/2") == 1){%>GAIN_FACTOR_6,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C2/3") == 1){%>GAIN_FACTOR_12,<%} %>
+  .kGainG0Ch3 = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_GainControlG0C3/0") == 1){%>GAIN_FACTOR_1,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C3/1") == 1){%>GAIN_FACTOR_3,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C3/2") == 1){%>GAIN_FACTOR_6,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C3/3") == 1){%>GAIN_FACTOR_12,<%} %>
+  .kGainG0Ch4 = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_GainControlG0C4/0") == 1){%>GAIN_FACTOR_1,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C4/1") == 1){%>GAIN_FACTOR_3,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C4/2") == 1){%>GAIN_FACTOR_6,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C4/3") == 1){%>GAIN_FACTOR_12,<%} %>
+  .kGainG0Ch5 = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_GainControlG0C5/0") == 1){%>GAIN_FACTOR_1,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C5/1") == 1){%>GAIN_FACTOR_3,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C5/2") == 1){%>GAIN_FACTOR_6,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C5/3") == 1){%>GAIN_FACTOR_12,<%} %>
+  .kGainG0Ch6 = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_GainControlG0C6/0") == 1){%>GAIN_FACTOR_1,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C6/1") == 1){%>GAIN_FACTOR_3,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C6/2") == 1){%>GAIN_FACTOR_6,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C6/3") == 1){%>GAIN_FACTOR_12,<%} %>
+  .kGainG0Ch7 = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_GainControlG0C7/0") == 1){%>GAIN_FACTOR_1,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C7/1") == 1){%>GAIN_FACTOR_3,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C7/2") == 1){%>GAIN_FACTOR_6,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG0C7/3") == 1){%>GAIN_FACTOR_12,<%} %>
+  .kGainG1Ch0 = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_GainControlG1C0/0") == 1){%>GAIN_FACTOR_1,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C0/1") == 1){%>GAIN_FACTOR_3,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C0/2") == 1){%>GAIN_FACTOR_6,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C0/3") == 1){%>GAIN_FACTOR_12,<%} %>
+  .kGainG1Ch1 = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_GainControlG1C1/0") == 1){%>GAIN_FACTOR_1,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C1/1") == 1){%>GAIN_FACTOR_3,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C1/2") == 1){%>GAIN_FACTOR_6,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C1/3") == 1){%>GAIN_FACTOR_12,<%} %>
+  .kGainG1Ch2 = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_GainControlG1C2/0") == 1){%>GAIN_FACTOR_1,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C2/1") == 1){%>GAIN_FACTOR_3,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C2/2") == 1){%>GAIN_FACTOR_6,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C2/3") == 1){%>GAIN_FACTOR_12,<%} %>
+  .kGainG1Ch3 = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_GainControlG1C3/0") == 1){%>GAIN_FACTOR_1,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C3/1") == 1){%>GAIN_FACTOR_3,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C3/2") == 1){%>GAIN_FACTOR_6,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C3/3") == 1){%>GAIN_FACTOR_12,<%} %>
+  .kGainG1Ch4 = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_GainControlG1C4/0") == 1){%>GAIN_FACTOR_1,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C4/1") == 1){%>GAIN_FACTOR_3,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C4/2") == 1){%>GAIN_FACTOR_6,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C4/3") == 1){%>GAIN_FACTOR_12,<%} %>
+  .kGainG1Ch5 = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_GainControlG1C5/0") == 1){%>GAIN_FACTOR_1,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C5/1") == 1){%>GAIN_FACTOR_3,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C5/2") == 1){%>GAIN_FACTOR_6,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C5/3") == 1){%>GAIN_FACTOR_12,<%} %>
+  .kGainG1Ch6 = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_GainControlG1C6/0") == 1){%>GAIN_FACTOR_1,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C6/1") == 1){%>GAIN_FACTOR_3,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C6/2") == 1){%>GAIN_FACTOR_6,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C6/3") == 1){%>GAIN_FACTOR_12,<%} %>
+  .kGainG1Ch7 = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_shs_GainControlG1C7/0") == 1){%>GAIN_FACTOR_1,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C7/1") == 1){%>GAIN_FACTOR_3,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C7/2") == 1){%>GAIN_FACTOR_6,<%} else if  (app.getIntegerValue(AppBaseuri + "0/adc004_shs_GainControlG1C7/3") == 1){%>GAIN_FACTOR_12,<%} %>
+       <%int LoopChsel1 =16;   
+         if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen1g0c0/0") == 1) { LoopChsel1 = 0; } else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen1g0c1/0") == 1) { LoopChsel1 = 1; }
+	     else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen1g0c2/0") == 1) { LoopChsel1 = 2; } else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen1g0c3/0") == 1) {LoopChsel1 = 3; }
+		 else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen1g0c4/0") == 1) { LoopChsel1 = 4; } else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen1g0c5/0") == 1) {LoopChsel1 = 5; }
+		 else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen1g0c6/0") == 1) { LoopChsel1 = 6; } else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen1g0c7/0") == 1) { LoopChsel1 = 7; }
+		 else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen1g1c0/0") == 1) { LoopChsel1 = 8; } else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen1g1c1/0") == 1) { LoopChsel1 = 9; }
+		 else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen1g1c2/0") == 1) { LoopChsel1 = 10; } else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen1g1c3/0") == 1) { LoopChsel1 = 11; }
+		 else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen1g1c4/0") == 1) { LoopChsel1 = 12; } else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen1g1c5/0") == 1) { LoopChsel1 = 13; }
+		 else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen1g1c6/0") == 1) { LoopChsel1 = 14; } else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen1g1c7/0") == 1) { LoopChsel1 = 15; }
+		 else {LoopChsel1 = 16; } 	  
+         int LoopChsel0 = 16;   
+	     if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen0g0c0/0") == 1) { LoopChsel0 = 0; } else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen0g0c1/0") == 1) { LoopChsel0 = 1; }
+		 else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen0g0c2/0") == 1) { LoopChsel0 = 2; } else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen0g0c3/0") == 1) {LoopChsel0 = 3; }
+		 else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen0g0c4/0") == 1) { LoopChsel0 = 4; } else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen0g0c5/0") == 1) {LoopChsel0 = 5; }
+		 else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen0g0c6/0") == 1) { LoopChsel0 = 6; } else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen0g0c7/0") == 1) { LoopChsel0 = 7; }
+		 else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen0g1c0/0") == 1) { LoopChsel0 = 8; } else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen0g1c1/0") == 1) { LoopChsel0 = 9; }
+		 else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen0g1c2/0") == 1) { LoopChsel0 = 10; } else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen0g1c3/0") == 1) { LoopChsel0 = 11; }
+		 else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen0g1c4/0") == 1) { LoopChsel0 = 12; } else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen0g1c5/0") == 1) { LoopChsel0 = 13; }
+		 else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen0g1c6/0") == 1) { LoopChsel0 = 14; } else if(app.getIntegerValue(AppBaseuri +  "0/adc004_shs_lpen0g1c7/0") == 1) { LoopChsel0 = 15; }
+		 else {LoopChsel0 = 16; }%>
+  .kLoopen1 = (uint8_t)<%if (LoopChsel1 < 16) {%>1, <%} else {%>0, <% } %>
+  .kLoopen0 = (uint8_t)<%if (LoopChsel0 < 16) {%>1, <%} else {%>0, <% } %>
+  .kGroupLoop0 = (uint8_t)<%if (LoopChsel0 < 8) {%>0, <%} else {%>1, <% } %>
+  .kGroupLoop1 = (uint8_t)<%if (LoopChsel1 < 8) {%>0, <%} else {%>1, <% } %>
+  .kChLoop1 = (uint8_t)<%if (LoopChsel1 < 8) {%><%=LoopChsel1%>, <%} else {%><%=(LoopChsel1 - 8)%>, <% } %>
+  .kChLoop0 = (uint8_t)<%if (LoopChsel0 < 8) {%><%=LoopChsel0%>, <%} else {%><%=(LoopChsel0 - 8)%>, <% } %>
+  .kChannels = (uint8_t)<%=TotalChannels%>,
+  .kGroup0ChSelect = (uint8_t)<%= g0asssel%>, 
+  .kGroup1ChSelect = (uint8_t)<%= g1asssel%>,
+  .kGrpAChannels = (uint8_t)<%= GrpAChannels %>,
+  .kGrpBChannels = (uint8_t)<%= GrpBChannels %>,  
+  .kActiveGroups = {(uint8_t)<%= ((g3groupact >> 0 ) & 1)%>, (uint8_t)<%= ((g3groupact >> 1 ) & 1)%> },   
+  .kActiveChannels = {{(uint8_t)<%= ((g0chact >> 0 ) & 1)%>, (uint8_t)<%= ((g0chact >> 1 ) & 1)%>, (uint8_t)<%= ((g0chact >> 2 ) & 1)%>, (uint8_t)<%= ((g0chact >> 3 ) & 1)%>, (uint8_t)<%= ((g0chact >> 4 ) & 1)%>, (uint8_t)<%= ((g0chact >> 5 ) & 1)%>, (uint8_t)<%= ((g0chact >> 6 ) & 1)%>, (uint8_t)<%= ((g0chact >> 7 ) & 1)%> },
+                      {(uint8_t)<%= ((g1chact >> 0 ) & 1)%>, (uint8_t)<%= ((g1chact >> 1 ) & 1)%>, (uint8_t)<%= ((g1chact >> 2 ) & 1)%>, (uint8_t)<%= ((g1chact >> 3 ) & 1)%>, (uint8_t)<%= ((g1chact >> 4 ) & 1)%>, (uint8_t)<%= ((g1chact >> 5 ) & 1)%>, (uint8_t)<%= ((g1chact >> 6 ) & 1)%>, (uint8_t)<%= ((g1chact >> 7 ) & 1)%> } 
+                       },  
+  .kPriority = (uint8_t)ADC004_PRIORITY0,  
+  .kResultReadMode = (uint8_t)ADC004_WAIT_FOR_READ,
+  .kTriggerMode = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/ADC004_erwtrgmode/0") == 1){%>ADC004_NOTRIGGER,<%} else if  (app.getIntegerValue(AppBaseuri + "0/ADC004_erwtrgmode/1") == 1){%>ADC004_TRIGGER_UPON_FALLING_EDGE,<%} else if  (app.getIntegerValue(AppBaseuri + "0/ADC004_erwtrgmode/2") == 1){%>ADC004_TRIGGER_UPON_RISING_EDGE,<%} else if  (app.getIntegerValue(AppBaseuri + "0/ADC004_erwtrgmode/3") == 1){%>ADC004_TRIGGER_UPON_BOTH_EDGE,<%} %>
+  .kGatingMode = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/ADC004_erwgatmode/0") == 1){%>ADC004_GATING_DISABLED,<%} else if  (app.getIntegerValue(AppBaseuri + "0/ADC004_erwgatmode/1") == 1){%>ADC004_GATING_ENABLED_ALWAYS,<%} else if  (app.getIntegerValue(AppBaseuri + "0/ADC004_erwgatmode/2") == 1){%>ADC004_GATING_ENABLED_FOR_HIGH,<%} else if  (app.getIntegerValue(AppBaseuri + "0/ADC004_erwgatmode/3") == 1){%>ADC004_GATING_ENABLED_FOR_LOW,<%} %>
+  .kTriggerEn = (uint8_t)<% if (app.getIntegerValue(AppBaseuri +  "0/adc004_erwtrgmode") > 0){%>1,<%} else {%>0,<%}%>
+  .kAutoScan = (uint8_t)<% if (app.getIntegerValue(AppBaseuri + "0/adc004_erwautoscanmode/0") == 1){%>ADC004_AUTOSCAN_ENABLE,<%} else {%>ADC004_AUTOSCAN_DISABLE,<%}%>
+  .kResultControl = (uint8_t)<% if (app.getIntegerValue(AppBaseuri + "0/adc004_erwresultposition/0") == 1){%>ADC004_LEFT_ALIGN,<%} else {%>ADC004_RIGHT_ALIGN,<%}%>
+  .kResultEvtEnable= (uint8_t)<%= app.getIntegerValue(AppBaseuri + "0/adc004_erwresulteventenable/0")%>,
+  .kResourceEvtEnable= (uint8_t)<%= app.getIntegerValue(AppBaseuri + "0/adc004_erwreqsurcenable/0")%>,
+  .kIpClassSel = <% if((app.getIntegerValue(AppBaseuri + "0/adc004_erwinputclasssel/0") == 1)){%>(uint8_t)ADC004_GLOBAL_CLASS0<%}
+    else {%> (uint8_t)ADC004_GLOBAL_CLASS1 <%}%>,  
+  .VADCGlobalPtr= (VADC_GLOBAL_TypeDef*)VADC,
+  .SHSPtr= (SHS_Type*)SHS0,
+  .DynamicHandlePtr= &ADC004_DynamicHandle,
+ };
+ 
+/*CODE_BLOCK_END*/
